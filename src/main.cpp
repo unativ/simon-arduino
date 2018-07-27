@@ -14,8 +14,7 @@ const int button_state[] = { 0, 0, 0, 0 };
 int sequence[MAX_TURNS]; 
 int turn = 0;
 
-void setup() 
-{
+void setup() {
     Serial.begin(9600);
     Serial.println("Setup");
 
@@ -92,6 +91,11 @@ boolean playerTurn() {
 
         if (button != sequence[step]) {
             Serial.println("YOU LOOSE :(");
+            delay(300);
+
+            tone(SPEAKER_PIN, NOTE_E1);
+            delay(1500);
+            noTone(SPEAKER_PIN);
             return false;
         }
         else {
@@ -101,12 +105,30 @@ boolean playerTurn() {
     return true;
 }
 
-void loop()
-{
+int chooseGame() {
+    int game = -1;
+    while (game == -1) {
+        for (int button = 0; button < 4; button++){
+            int switchState = digitalRead(button_pins[button]);
+            if (switchState == HIGH) {
+                game = button;
+            }
+        }
+    }
+    Serial.print("Game chosen: ");
+    Serial.println(game);
+    delay(1000);
+    return game;
+}
+
+void loop() {
 
     Serial.println("New game");
     boolean winning = true;
     turn = 0;
+
+    int game = chooseGame();
+
 
     while (winning && turn < MAX_TURNS) {
         Serial.print("turn:");
@@ -115,6 +137,4 @@ void loop()
         winning = playerTurn();
         delay(500);
     }
-
-    delay(1000);
 }
