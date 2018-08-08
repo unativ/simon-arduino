@@ -40,16 +40,27 @@ void playSequence() {
     sequence[turn] = randNumber;
     turn++;
 
+    int toneTime;
+    if (turn <= 5) {
+        toneTime = 420;
+    }
+    else if (turn <= 13) {
+        toneTime = 320;
+    }
+    else {
+        toneTime = 220;
+    }
+
     Serial.println("Current sequence:");
     for (int i = 0; i < turn; i++) {
         const int led = sequence[i];
         
         Serial.println(colors[led]);
-        tone(SPEAKER_PIN, sounds[led], 500);
+        tone(SPEAKER_PIN, sounds[led], toneTime);
         digitalWrite(led_pins[led], HIGH);
-        delay(500);
+        delay(toneTime);
         digitalWrite(led_pins[led], LOW);
-        delay(100);
+        delay(50);
     }
     Serial.println();
 }
