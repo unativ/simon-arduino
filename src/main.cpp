@@ -30,13 +30,14 @@ void setup() {
     }
 }
 
-void playSequence() {
+void playSequence(int colors[], int players) {
     if (turn == MAX_TURNS) {
         Serial.println("Victory!!!!!!!!!");
         return;
     }
 
-    int randNumber = random(0, 4);
+    int randNumber = random(0, players);
+    int nextColor = colors[randNumber];
     sequence[turn] = randNumber;
     turn++;
 
@@ -65,7 +66,7 @@ void playSequence() {
     Serial.println();
 }
 
-boolean playerTurn() {
+int playerTurn() {
     int step = 0;
     while (step < turn) {
         boolean pressed = false;
@@ -107,13 +108,13 @@ boolean playerTurn() {
             tone(SPEAKER_PIN, NOTE_E1);
             delay(1500);
             noTone(SPEAKER_PIN);
-            return false;
+            return button;
         }
         else {
             step++;
         }
     }
-    return true;
+    return -1;
 }
 
 int chooseGame() {
@@ -132,20 +133,63 @@ int chooseGame() {
     return game;
 }
 
-void loop() {
+void fourPlayersGame() {
+    Serial.println("fourPlayersGame");
 
-    Serial.println("New game");
-    boolean winning = true;
+    int winning = -1;
     turn = 0;
+    int colors[] = {0, 1, 2, 3};
+
+    while (winning == -1 && turn < MAX_TURNS) {
+        Serial.print("turn:");
+        Serial.println(turn);
+        playSequence(colors, 4);
+        winning = playerTurn(); 
+        delay(500);
+    }   
+}
+
+void twoPlayersGame() {
+    Serial.println("twoPlayersGame");
+}
+
+void animalsGame() {
+    Serial.println("animnalsGame");
+}
+
+void defaultGame() {
+     Serial.println("defaultGame");
+
+    int winning = -1;
+    turn = 0;
+    int colors[] = {0, 1, 2, 3};
+
+    while (winning == -1 && turn < MAX_TURNS) {
+        Serial.print("turn:");
+        Serial.println(turn);
+        playSequence(colors, 4);
+        winning = playerTurn();
+        delay(500);
+    }
+}
+
+void loop() {
+    Serial.println("New game");
 
     int game = chooseGame();
 
-
-    while (winning && turn < MAX_TURNS) {
-        Serial.print("turn:");
-        Serial.println(turn);
-        playSequence();
-        winning = playerTurn();
-        delay(500);
+    switch (game) {
+    case 0:
+        fourPlayersGame();
+        break;
+    case 1:
+        twoPlayersGame();
+        break;
+    case 2:
+        animalsGame();
+        break;
+    case 3:
+        defaultGame();
+        break;
     }
 }
