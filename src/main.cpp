@@ -70,40 +70,43 @@ void playSequence(int colors[], int players) {
 int playerTurn(int colors [], int players) {
     elapsedMillis timeElapsed;
     int step = 0;
-    boolean timeout = false;
     while (step < turn) {
         boolean pressed = false;
-        int button = 0;
+        boolean timeout = false;
+        int loosingButton = -1;
+        int colorPressed = -1;
+
         while (!pressed && !timeout) {
             if (timeElapsed > 3000) {
-                //return sequence[step];
                 timeout = true;
-                button = sequence[step];
+                loosingButton = sequence[step];
                 Serial.print("Time out for: ");
-                Serial.println(button);
+                Serial.println(loosingButton);
             }
             else {
-                for (button = 0; button < players; button++) {
-                    int color = colors[button];
-                    int switchState = digitalRead(button_pins[color]);
-                    if (switchState == HIGH) {
+                for (int button = 0; button < players; button++) {
+                    int selectedColor = colors[button];
+                    int switchState = digitalRead(button_pins[selectedColor]);
+                    if ( switchState == HIGH) {
                         pressed = true;
+                        colorPressed = colors[button];
                         break;
                     }
                 }
             }
         }
-        if (!timeout) {
-            Serial.print(colors[button]);
+
+        if (pressed) {
+            Serial.print(colorPressed);
             Serial.println(" HIGH");
 
-            tone(SPEAKER_PIN, sounds[button]);
-            digitalWrite(led_pins[button], HIGH);
+            tone(SPEAKER_PIN, sounds[colorPressed]);
+            digitalWrite(led_pins[colorPressed], HIGH);
             delay(200);
 
             boolean buttonUp = false;
             while (!buttonUp) {
-                int switchState = digitalRead(button_pins[button]);
+                int switchState = digitalRead(button_pins[colorPressed]);
                 if (switchState == LOW) {
                     buttonUp = true;
                 }
@@ -111,11 +114,15 @@ int playerTurn(int colors [], int players) {
             Serial.println("Button up.");
 
             noTone(SPEAKER_PIN);
-            digitalWrite(led_pins[button], LOW);
+            digitalWrite(led_pins[colorPressed], LOW);
             delay(200);
+
+            if (colorPressed != sequence[step]) {
+                loosingButton = colorPressed;
+            }
         }
 
-        if (timeout || button != sequence[step]) {
+        if (loosingButton != -1) {
             Serial.println("YOU LOOSE :(");
             delay(300);
 
@@ -123,8 +130,8 @@ int playerTurn(int colors [], int players) {
             delay(1500);
             noTone(SPEAKER_PIN);
             Serial.print("Loosing button");
-            Serial.println(button);
-            return button;
+            Serial.println(loosingButton);
+            return loosingButton;
         }
         else {
             step++;
@@ -209,7 +216,7 @@ void fourPlayersGame() {
     }
 
     Serial.print("Player won: ");
-    Serial.print(colors[0]);
+    Serial.println(colors[0]);
 
     showColors(colors, 1);
 }
